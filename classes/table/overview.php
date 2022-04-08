@@ -128,8 +128,8 @@ class overview extends \table_sql {
             $picturefields = \user_picture::fields('u');
         }
 
-        $enroljoin = get_enrolled_with_capabilities_join($this->progress->get_context(), '', '', $groups,
-            get_config('block_completion_progress', 'showinactive') == 0);
+        $enroljoin = get_enrolled_with_capabilities_join($this->progress->get_context(), '', '', $groups);
+        $userwhere = get_config('block_completion_progress', 'showinactive') ? '' : "AND NOT u.suspended";
 
         $params = $enroljoin->params + ['courseid' => $this->progress->get_course()->id];
         if ($roleid) {
@@ -144,7 +144,7 @@ class overview extends \table_sql {
         $this->set_sql(
             "DISTINCT $picturefields, l.timeaccess",
             "{user} u {$enroljoin->joins} {$rolejoin} LEFT JOIN {user_lastaccess} l ON l.userid = u.id AND l.courseid = :courseid",
-            "{$enroljoin->wheres} {$rolewhere}",
+            "{$enroljoin->wheres} {$userwhere} {$rolewhere}",
             $params
         );
     }
